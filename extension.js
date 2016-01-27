@@ -6,10 +6,10 @@
 define(function(require, exports, module) {
   "use strict";
 
-  console.log("Loading viewerZIP");
-
   var extensionID = "viewerZIP"; // ID should be equal to the directory name where the ext. is located
   var extensionSupportedFileTypes = ["zip"];
+
+  console.log("Loading " + extensionID);
 
   var TSCORE = require("tscore");
   var JSZip = require("jszip");
@@ -84,22 +84,22 @@ define(function(require, exports, module) {
   function init(filePath, elementID) {
     console.log("Initalization Browser ZIP Viewer...");
     createZipPrewiew(filePath, elementID);
-  };
+  }
 
   function viewerMode() {
 
     console.log("viewerMode not supported on this extension");
-  };
+  }
 
   function setContent(content) {
 
     console.log("setContent not supported on this extension");
-  };
+  }
 
   function getContent() {
 
     console.log("getContent not supported on this extension");
-  };
+  }
 
   exports.init = init;
   exports.getContent = getContent;
