@@ -24,7 +24,7 @@ If you want to extend this extensions, please follow our general [extension deve
 
 ## Screenshots
 
-![Screenshot of the viewerZIP](http://tagspaces.org/extensions/editorHTML/viewerZIP-screenshot.png)
+![Screenshot of the viewerZIP](http://tagspaces.org/extensions/viewerZIP/viewerZIP-screenshot.png)
 
 ## License
 
