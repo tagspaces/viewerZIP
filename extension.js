@@ -10,24 +10,41 @@ define(function(require, exports, module) {
   var extensionSupportedFileTypes = ["zip"];
 
   console.log("Loading " + extensionID);
-
+  //nanobar progress
+  var Nanobar = require('ext/viewerZIP/libs/nanobar/nanobar.min');
   var TSCORE = require("tscore");
   var JSZip = require("jszip");
   var maxPreviewSize = (1024 * 3); //3kb limit for preview
   var extensionDirectory = TSCORE.Config.getExtensionPath() + "/" + extensionID;
 
+  var nanobar = new Nanobar( {
+	  bg : '#0000ff', //(optional) background css property, '#000' by default
+	  id :  'nanobar_div' //(optional) id for nanobar div
+  });
+
   function showContentFilePreviewDialog(containFile) {
     var unitArr = containFile.asUint8Array();
     var previewText = "";
     var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
-    
+
+    //--nanobar settings--
+	var progressChunk = parseInt(byteLength/100);
+	var currentProgress = 0	;
     for (var i = 0; i < byteLength; i++) {
+	   //--nanobar settings--
+	  var check = (( i % progressChunk)==0);
+      if(check) {
+		  currentProgress++;
+          if(currentProgress<=100) nanobar.go(currentProgress);
+	  }
+	  //--------------------
       previewText += String.fromCharCode(unitArr[i]);
     }
+	nanobar.go(100); //set to 100% at the end
 
     var fileContent = $("<pre/>").text(previewText);
     require(['text!' + extensionDirectory + '/previewDialog.html'], function(uiTPL) {
-      
+
       if ($('#previewDialog').length < 1) {
         var uiTemplate = Handlebars.compile(uiTPL);
         $('body').append(uiTemplate());
@@ -54,7 +71,7 @@ define(function(require, exports, module) {
     //.width($parent.width()).height($parent.height()).appendTo($parent);
 
     TSCORE.showLoadingAnimation();
-    
+
     TSCORE.IO.getFileContentPromise(filePath).then(function(content) {
       var zipFile = new JSZip(content);
       $previewElement.append("<p> Contents of file " + filePath + "</p>");
@@ -75,7 +92,7 @@ define(function(require, exports, module) {
       }
 
       TSCORE.hideLoadingAnimation();
-    }, 
+    },
     function(error) {
       $previewElement.append("<p> Error in getFileContent :" + error + "</p>");
     });
