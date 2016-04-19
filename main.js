@@ -10,197 +10,172 @@ var isWeb;
 
 var $htmlContent;
 
-$(document).ready(function() {
-  function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-      results = regex.exec(location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
+var JSZip;
 
-  var locale = getParameterByName("locale");
+$(document).ready(function () {
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
 
-  var extSettings;
-  loadExtSettings();
+    var locale = getParameterByName("locale");
 
-  isCordova = parent.isCordova;
-  isWin = parent.isWin;
-  isWeb = parent.isWeb;
+    var extSettings;
+    loadExtSettings();
 
-  $(document).on('drop dragend dragenter dragover', function(event) {
-    event.preventDefault();
-  });
+    isCordova = parent.isCordova;
+    isWin = parent.isWin;
+    isWeb = parent.isWeb;
 
-  $('#aboutExtensionModal').on('show.bs.modal', function() {
-    $.ajax({
-      url: 'README.md',
-      type: 'GET'
-    })
-    .done(function(mdData) {
-      //console.log("DATA: " + mdData);
-      if (marked) {
-        var modalBody = $("#aboutExtensionModal .modal-body");
-        modalBody.html(marked(mdData, { sanitize: true }));
-        handleLinks(modalBody);
-      } else {
-        console.log("markdown to html transformer not found");
-      }  
-    })
-    .fail(function(data) {
-      console.warn("Loading file failed " + data);
+    $(document).on('drop dragend dragenter dragover', function (event) {
+        event.preventDefault();
     });
-  });
 
-  function handleLinks($element) {
-    $element.find("a[href]").each(function() {
-      var currentSrc = $(this).attr("href");
-      $(this).bind('click', function(e) {
-        e.preventDefault();
-        var msg = {command: "openLinkExternally", link : currentSrc};
-        window.parent.postMessage(JSON.stringify(msg), "*");
-      });
+    $('#aboutExtensionModal').on('show.bs.modal', function () {
+        $.ajax({
+                url: 'README.md',
+                type: 'GET'
+            })
+            .done(function (zipData) {
+                //console.log("DATA: " + zipData);
+                if (marked) {
+                    var modalBody = $("#aboutExtensionModal .modal-body");
+                    modalBody.html(marked(zipData, {sanitize: true}));
+                    handleLinks(modalBody);
+                } else {
+                    console.log("markdown to html transformer not found");
+                }
+            })
+            .fail(function (data) {
+                console.warn("Loading file failed " + data);
+            });
     });
-  }
 
-
-  $htmlContent = $("#htmlContent");
-
-  var styles = ['', 'solarized-dark', 'github', 'metro-vibes', 'clearness', 'clearness-dark'];
-  var currentStyleIndex = 0;
-  if (extSettings && extSettings.styleIndex) {
-    currentStyleIndex = extSettings.styleIndex;
-  }
-
-  var zoomSteps = ['zoomSmallest', 'zoomSmaller', 'zoomSmall', 'zoomDefault', 'zoomLarge', 'zoomLarger', 'zoomLargest'];
-  var currentZoomState = 3;
-  if (extSettings && extSettings.zoomState) {
-    currentZoomState = extSettings.zoomState;
-  }
-
-  $htmlContent.removeClass();
-  $htmlContent.addClass('markdown ' + styles[currentStyleIndex] + " " + zoomSteps[currentZoomState]);
-
-  $("#changeStyleButton").bind('click', function() {
-    currentStyleIndex = currentStyleIndex + 1;
-    if (currentStyleIndex >= styles.length) {
-      currentStyleIndex = 0;
+    function handleLinks($element) {
+        $element.find("a[href]").each(function () {
+            var currentSrc = $(this).attr("href");
+            $(this).bind('click', function (e) {
+                e.preventDefault();
+                var msg = {command: "openLinkExternally", link: currentSrc};
+                window.parent.postMessage(JSON.stringify(msg), "*");
+            });
+        });
     }
-    $htmlContent.removeClass();
-    $htmlContent.addClass('markdown ' + styles[currentStyleIndex] + " " + zoomSteps[currentZoomState]);
-    saveExtSettings();
-  });
 
-  $("#resetStyleButton").bind('click', function() {
-    currentStyleIndex = 0;
-    $htmlContent.removeClass();
-    $htmlContent.addClass('markdown ' + styles[currentStyleIndex] + " " + zoomSteps[currentZoomState]);
-    saveExtSettings();
-  });
 
-  $("#zoomInButton").bind('click', function() {
-    currentZoomState++;
-    if (currentZoomState >= zoomSteps.length) {
-      currentZoomState = 6;
+    $htmlContent = $("#htmlContent");
+
+    var styles = ['', 'solarized-dark', 'github', 'metro-vibes', 'clearness', 'clearness-dark'];
+    var currentStyleIndex = 0;
+    if (extSettings && extSettings.styleIndex) {
+        currentStyleIndex = extSettings.styleIndex;
     }
-    $htmlContent.removeClass();
-    $htmlContent.addClass('markdown ' + styles[currentStyleIndex] + " " + zoomSteps[currentZoomState]);
-    saveExtSettings();
-  });
 
-  $("#zoomOutButton").bind('click', function() {
-    currentZoomState--;
-    if (currentZoomState < 0) {
-      currentZoomState = 0;
+    $htmlContent.removeClass();
+    $htmlContent.addClass('markdown ' + styles[currentStyleIndex]);
+
+    $("#printButton").on("click", function () {
+        $(".dropdown-menu").dropdown('toggle');
+        window.print();
+    });
+
+    if (isCordova) {
+        $("#printButton").hide();
     }
-    $htmlContent.removeClass();
-    $htmlContent.addClass('markdown ' + styles[currentStyleIndex] + " " + zoomSteps[currentZoomState]);
-    saveExtSettings();
-  });
 
-  $("#zoomResetButton").bind('click', function() {
-    currentZoomState = 3;
-    $htmlContent.removeClass();
-    $htmlContent.addClass('markdown ' + styles[currentStyleIndex] + " " + zoomSteps[currentZoomState]);
-    saveExtSettings();
-  });
 
-  $("#printButton").on("click", function() {
-    $(".dropdown-menu").dropdown('toggle');
-    window.print();
-  });
+    // Init internationalization
+    $.i18n.init({
+        ns: {namespaces: ['ns.viewerZIP']},
+        debug: true,
+        lng: locale,
+        fallbackLng: 'en_US'
+    }, function () {
+        $('[data-i18n]').i18n();
+    });
 
-  if (isCordova) {
-    $("#printButton").hide();
-  }
+    function loadExtSettings() {
+        extSettings = JSON.parse(localStorage.getItem("viewerZIPSettings"));
+    }
 
-  // Init internationalization
-  $.i18n.init({
-    ns: {namespaces: ['ns.viewerHTML']},
-    debug: true,
-    lng: locale,
-    fallbackLng: 'en_US'
-  }, function() {
-    $('[data-i18n]').i18n();
-  });
-
-  function saveExtSettings() {
-    var settings = {
-      "styleIndex": currentStyleIndex,
-      "zoomState":  currentZoomState
-    };
-    localStorage.setItem('viewerHTMLSettings', JSON.stringify(settings));
-  }
-
-  function loadExtSettings() {
-    extSettings = JSON.parse(localStorage.getItem("viewerHTMLSettings"));
-  }
-
+    var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
+    //function showContentFilePreviewDialog(containFile) {
+    //    var unitArr = containFile.asUint8Array();
+    //    var previewText = "";
+    //    var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
+    //
+    //    for (var i = 0; i < byteLength; i++) {
+    //        previewText += String.fromCharCode(unitArr[i]);
+    //    }
+    //
+    //    var fileContent = $("<pre/>").text(previewText);
+    //    require(['text!' + extensionDirectory + '/previewDialog.html'], function (uiTPL) {
+    //
+    //        if ($('#previewDialog').length < 1) {
+    //            var uiTemplate = Handlebars.compile(uiTPL);
+    //            $('body').append(uiTemplate());
+    //        }
+    //        var dialogPreview = $('#previewDialog');
+    //        dialogPreview.find('.modal-body').empty().append(fileContent);
+    //        dialogPreview.modal({
+    //            backdrop: 'static',
+    //            show: true
+    //        });
+    //    });
+    //}
 });
 
 function setContent(content, fileDirectory) {
-  $htmlContent = $("#htmlContent");
+    var $htmlContent = $('#htmlContent');
+    $htmlContent.append(content);
+    console.log("SET ZIP VIEWER CONTENT : " + content);
 
-  $htmlContent.append(content);
+    var zip = new JSZip(content);
+    zip.file(content, fileDirectory);
+    console.log("ZIP FILE : " + zip.file());
 
-  if (fileDirectory.indexOf("file://") === 0) {
-    fileDirectory = fileDirectory.substring(("file://").length, fileDirectory.length);
-  }
+    $("base").attr("href", fileDirectory + "//");
 
-  var hasURLProtocol = function(url) {
-    return (
-      url.indexOf("http://") === 0 ||
-      url.indexOf("https://") === 0 ||
-      url.indexOf("file://") === 0 ||
-      url.indexOf("data:") === 0
-    );
-  };
-
-  // fixing embedding of local images
-  $htmlContent.find("img[src]").each(function() {
-    var currentSrc = $(this).attr("src");
-    if (!hasURLProtocol(currentSrc)) {
-      var path = (isWeb ? "" : "file://") + fileDirectory + "/" + currentSrc;
-      $(this).attr("src", path);
-    }
-  });
-
-  $htmlContent.find("a[href]").each(function() {
-    var currentSrc = $(this).attr("href");
-    var path;
-
-    if (!hasURLProtocol(currentSrc)) {
-      var path = (isWeb ? "" : "file://") + fileDirectory + "/" + currentSrc;
-      $(this).attr("href", path);
+    if (fileDirectory.indexOf("file://") === 0) {
+        fileDirectory = fileDirectory.substring(("file://").length, fileDirectory.length);
     }
 
-    $(this).bind('click', function(e) {
-      e.preventDefault();
-      if (path) {
-        currentSrc = encodeURIComponent(path);
-      }
-      var msg = {command: "openLinkExternally", link : currentSrc};
-      window.parent.postMessage(JSON.stringify(msg), "*");
+    var hasURLProtocol = function(url) {
+        return (
+            url.indexOf("http://") === 0 ||
+            url.indexOf("https://") === 0 ||
+            url.indexOf("file://") === 0 ||
+            url.indexOf("data:") === 0
+        );
+    };
+
+    // fixing embedding of local images
+    $htmlContent.find("img[src]").each(function() {
+        var currentSrc = $(this).attr("src");
+        if (!hasURLProtocol(currentSrc)) {
+            var path = (isWeb ? "" : "file://") + fileDirectory + "/" + currentSrc;
+            $(this).attr("src", path);
+        }
     });
-  });
 
+    $htmlContent.find("a[href]").each(function() {
+        var currentSrc = $(this).attr("href");
+        var path;
+
+        if (!hasURLProtocol(currentSrc)) {
+            var path = (isWeb ? "" : "file://") + fileDirectory + "/" + currentSrc;
+            $(this).attr("href", path);
+        }
+
+        $(this).bind('click', function(e) {
+            e.preventDefault();
+            if (path) {
+                currentSrc = encodeURIComponent(path);
+            }
+            var msg = {command: "openLinkExternally", link : currentSrc};
+            window.parent.postMessage(JSON.stringify(msg), "*");
+        });
+    });
 }
