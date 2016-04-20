@@ -35,32 +35,6 @@ define(function (require, exports, module) {
             //"nwfaketop": "",
             "src": extensionDirectory + "/index.html?&locale=" + TSCORE.currentLanguage,
         }));
-
-        require([
-            extensionDirectory + '/libs/marked/lib/marked.js',
-        ], function (marked) {
-            zip2htmlConverter = marked;
-            zip2htmlConverter.setOptions({
-                renderer: new marked.Renderer(),
-                //highlight: function (code) {
-                //    //return require([extensionDirectory+'/highlightjs/highlight.js']).highlightAuto(code).value;
-                //},
-                gfm: true,
-                tables: true,
-                breaks: false,
-                pedantic: false,
-                smartLists: true,
-                smartypants: false
-            });
-            TSCORE.IO.getFileContentPromise(filePath).then(function (content) {
-                    exports.setContent(content);
-                },
-                function (error) {
-                    TSCORE.hideLoadingAnimation();
-                    TSCORE.showAlertDialog("Loading " + filePath + " failed.");
-                    console.error("Loading file " + filePath + " failed " + error);
-                });
-        });
     }
 
     function showContentFilePreviewDialog(containFile) {

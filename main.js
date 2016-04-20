@@ -64,17 +64,7 @@ $(document).ready(function () {
         });
     }
 
-
     $htmlContent = $("#htmlContent");
-
-    var styles = ['', 'solarized-dark', 'github', 'metro-vibes', 'clearness', 'clearness-dark'];
-    var currentStyleIndex = 0;
-    if (extSettings && extSettings.styleIndex) {
-        currentStyleIndex = extSettings.styleIndex;
-    }
-
-    $htmlContent.removeClass();
-    $htmlContent.addClass('markdown ' + styles[currentStyleIndex]);
 
     $("#printButton").on("click", function () {
         $(".dropdown-menu").dropdown('toggle');
@@ -84,7 +74,6 @@ $(document).ready(function () {
     if (isCordova) {
         $("#printButton").hide();
     }
-
 
     // Init internationalization
     $.i18n.init({
