@@ -88,83 +88,85 @@ $(document).ready(function () {
     function loadExtSettings() {
         extSettings = JSON.parse(localStorage.getItem("viewerZIPSettings"));
     }
-
-    var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
-    //function showContentFilePreviewDialog(containFile) {
-    //    var unitArr = containFile.asUint8Array();
-    //    var previewText = "";
-    //    var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
-    //
-    //    for (var i = 0; i < byteLength; i++) {
-    //        previewText += String.fromCharCode(unitArr[i]);
-    //    }
-    //
-    //    var fileContent = $("<pre/>").text(previewText);
-    //    require(['text!' + extensionDirectory + '/previewDialog.html'], function (uiTPL) {
-    //
-    //        if ($('#previewDialog').length < 1) {
-    //            var uiTemplate = Handlebars.compile(uiTPL);
-    //            $('body').append(uiTemplate());
-    //        }
-    //        var dialogPreview = $('#previewDialog');
-    //        dialogPreview.find('.modal-body').empty().append(fileContent);
-    //        dialogPreview.modal({
-    //            backdrop: 'static',
-    //            show: true
-    //        });
-    //    });
-    //}
 });
+
+var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
+function showContentFilePreviewDialog(containFile) {
+    console.log("<------ Open Contain Files ------->");
+    console.log(containFile);
+    console.log("<------ End" +
+        " Contain Files ------->");
+    var unitArr = containFile.asUint8Array();
+    var previewText = "";
+    var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
+
+    for (var i = 0; i < byteLength; i++) {
+        previewText += String.fromCharCode(unitArr[i]);
+    }
+
+    var fileContent = $("<pre/>").text(previewText);
+
+    $(window).load(function(uiTPL){
+        console.log("Load modal " + uiTPL);
+        if ($('#previewDialog').length < 1) {
+            var uiTemplate = Handlebars.compile(uiTPL);
+            $('body').append(uiTemplate());
+        }
+        var dialogPreview = $('#previewDialog');
+        dialogPreview.find('.modal-body').empty().append(fileContent);
+        dialogPreview.modal({
+            backdrop: 'static',
+            show: true
+        });
+    });
+    //require(['text!' + extensionDirectory + '/previewDialog.html'], function (uiTPL) {
+
+
+    //});
+}
 
 function setContent(content, fileDirectory) {
     var $htmlContent = $('#htmlContent');
     $htmlContent.append(content);
-    console.log("SET ZIP VIEWER CONTENT : " + content);
-
-    var zip = new JSZip(content);
-    zip.file(content, fileDirectory);
-    console.log("ZIP FILE : " + zip.file());
-
-    $("base").attr("href", fileDirectory + "//");
+    console.log("<---- Start main content ----->");
+    console.debug(content);
+    console.log("<---- End main content ----->");
 
     if (fileDirectory.indexOf("file://") === 0) {
         fileDirectory = fileDirectory.substring(("file://").length, fileDirectory.length);
     }
 
-    var hasURLProtocol = function(url) {
-        return (
-            url.indexOf("http://") === 0 ||
-            url.indexOf("https://") === 0 ||
-            url.indexOf("file://") === 0 ||
-            url.indexOf("data:") === 0
-        );
-    };
-
-    // fixing embedding of local images
-    $htmlContent.find("img[src]").each(function() {
-        var currentSrc = $(this).attr("src");
-        if (!hasURLProtocol(currentSrc)) {
-            var path = (isWeb ? "" : "file://") + fileDirectory + "/" + currentSrc;
-            $(this).attr("src", path);
-        }
+    $htmlContent.append('<div/>').css({
+        'overflow': 'auto',
+        'padding': '5px',
+        'background-color': 'white',
+        'fontSize': 12,
+        'width': '100%',
+        'height': '100%'
     });
+    $htmlContent.append("<p><h4> Contents of file " + fileDirectory + "</h4></p>");
+    var ulFiles = $htmlContent.append("<ul/>");
 
-    $htmlContent.find("a[href]").each(function() {
-        var currentSrc = $(this).attr("href");
-        var path;
-
-        if (!hasURLProtocol(currentSrc)) {
-            var path = (isWeb ? "" : "file://") + fileDirectory + "/" + currentSrc;
-            $(this).attr("href", path);
-        }
-
-        $(this).bind('click', function(e) {
-            e.preventDefault();
-            if (path) {
-                currentSrc = encodeURIComponent(path);
+    var zipFile = content;
+    //console.debug(zipFile);
+    if (!!Object.keys(zipFile.files) &&
+        typeof json !== 'content' &&
+        (typeof json !== 'function' ||
+        json === null)) {
+        for (var fileName in zipFile.files) {
+            if (zipFile.files[fileName].dir === true) {
+                continue;
             }
-            var msg = {command: "openLinkExternally", link : currentSrc};
-            window.parent.postMessage(JSON.stringify(msg), "*");
-        });
-    });
+            var linkToFile = $('<a>').attr('href', '#').text(fileName);
+            linkToFile.click(function (event) {
+                event.preventDefault();
+                var containFile = zipFile.files[$(this).text()];
+                showContentFilePreviewDialog(containFile);
+            });
+            var liFile = $('<li/>').css('list-style-type', 'none').append(linkToFile);
+            ulFiles.append(liFile);
+        }
+    } else {
+        throw new TypeError("Object.keys called on non-object");
+    }
 }
