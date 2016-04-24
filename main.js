@@ -94,8 +94,7 @@ var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 function showContentFilePreviewDialog(containFile) {
     console.log("<------ Open Contain Files ------->");
     console.log(containFile);
-    console.log("<------ End" +
-        " Contain Files ------->");
+    console.log("<------ End Contain Files ------->");
     var unitArr = containFile.asUint8Array();
     var previewText = "";
     var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
@@ -105,11 +104,14 @@ function showContentFilePreviewDialog(containFile) {
     }
 
     var fileContent = $("<pre/>").text(previewText);
+    var $htmlContent = $('#htmlContent');
 
-    $(window).load(function(uiTPL){
-        console.log("Load modal " + uiTPL);
+
+    $.post("previewDialog.html", function(uiTPL){
+        //console.log("Load modal " + uiTPL);
         if ($('#previewDialog').length < 1) {
             var uiTemplate = Handlebars.compile(uiTPL);
+            console.debug(uiTemplate);
             $('body').append(uiTemplate());
         }
         var dialogPreview = $('#previewDialog');
@@ -119,10 +121,7 @@ function showContentFilePreviewDialog(containFile) {
             show: true
         });
     });
-    //require(['text!' + extensionDirectory + '/previewDialog.html'], function (uiTPL) {
 
-
-    //});
 }
 
 function setContent(content, fileDirectory) {
