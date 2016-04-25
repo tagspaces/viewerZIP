@@ -127,9 +127,9 @@ function showContentFilePreviewDialog(containFile) {
 function setContent(content, fileDirectory) {
     var $htmlContent = $('#htmlContent');
     $htmlContent.append(content);
-    console.log("<---- Start main content ----->");
-    console.debug(content);
-    console.log("<---- End main content ----->");
+    //console.log("<---- Start main content ----->");
+    //console.debug(content);
+    //console.log("<---- End main content ----->");
 
     if (fileDirectory.indexOf("file://") === 0) {
         fileDirectory = fileDirectory.substring(("file://").length, fileDirectory.length);
@@ -145,13 +145,12 @@ function setContent(content, fileDirectory) {
     });
     $htmlContent.append("<p><h4> Contents of file " + fileDirectory + "</h4></p>");
     var ulFiles = $htmlContent.append("<ul/>");
-
     var zipFile = content;
     //console.debug(zipFile);
     if (!!Object.keys(zipFile.files) &&
-        typeof json !== 'content' &&
-        (typeof json !== 'function' ||
-        json === null)) {
+        typeof zipFile !== 'content' &&
+        (typeof zipFile !== 'function' ||
+        zipFile === null)) {
         for (var fileName in zipFile.files) {
             if (zipFile.files[fileName].dir === true) {
                 continue;
