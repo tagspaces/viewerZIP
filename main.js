@@ -5,6 +5,7 @@
 "use strict";
 
 var isCordova;
+
 var isWin;
 var isWeb;
 
@@ -33,24 +34,26 @@ $(document).ready(function () {
         event.preventDefault();
     });
 
-    $('#aboutExtensionModal').on('show.bs.modal', function () {
-        $.ajax({
-                url: 'README.md',
-                type: 'GET'
-            })
-            .done(function (zipData) {
-                //console.log("DATA: " + zipData);
-                if (marked) {
-                    var modalBody = $("#aboutExtensionModal .modal-body");
-                    modalBody.html(marked(zipData, {sanitize: true}));
-                    handleLinks(modalBody);
-                } else {
-                    console.log("markdown to html transformer not found");
-                }
-            })
-            .fail(function (data) {
-                console.warn("Loading file failed " + data);
-            });
+    $(document).ready(function() {
+        $('#aboutExtensionModal').on('show.bs.modal', function () {
+            $.ajax({
+                    url: 'README.md',
+                    type: 'GET'
+                })
+                .done(function (zipData) {
+                    console.log(zipData);
+                    if (marked) {
+                        var modalBody = $("#aboutExtensionModal .modal-body");
+                        modalBody.html(marked(zipData, {sanitize: true}));
+                        handleLinks(modalBody);
+                    } else {
+                        console.log("markdown to html transformer not found");
+                    }
+                })
+                .fail(function (data) {
+                    console.warn("Loading file failed " + data);
+                });
+        });
     });
 
     function handleLinks($element) {
@@ -65,14 +68,19 @@ $(document).ready(function () {
     }
 
     $htmlContent = $("#htmlContent");
+    $(document).ready(function() {
+        $("#printButton").on("click", function () {
+            $(".dropdown-menu").dropdown('toggle');
 
-    $("#printButton").on("click", function () {
-        $(".dropdown-menu").dropdown('toggle');
-        window.print();
+            window.print();
+            //location.reload();
+            window.stop();
+            //window.close();
+        });
     });
-
     if (isCordova) {
         $("#printButton").hide();
+        window.close();
     }
 
     // Init internationalization
@@ -127,9 +135,6 @@ function showContentFilePreviewDialog(containFile) {
 function setContent(content, fileDirectory) {
     var $htmlContent = $('#htmlContent');
     $htmlContent.append(content);
-    //console.log("<---- Start main content ----->");
-    //console.debug(content);
-    //console.log("<---- End main content ----->");
 
     if (fileDirectory.indexOf("file://") === 0) {
         fileDirectory = fileDirectory.substring(("file://").length, fileDirectory.length);
@@ -148,7 +153,6 @@ function setContent(content, fileDirectory) {
     var zipFile = content;
     //console.debug(zipFile);
     if (!!Object.keys(zipFile.files) &&
-        typeof zipFile !== 'content' &&
         (typeof zipFile !== 'function' ||
         zipFile === null)) {
         for (var fileName in zipFile.files) {
