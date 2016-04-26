@@ -62,12 +62,10 @@ define(function (require, exports, module) {
         if (typeof contentWindow.setContent === "function") {
             contentWindow.setContent(zipFile, fileDirectory);
         } else {
-            TSCORE.showAlertDialog("Can't load zip content");
-            throw new TypeError("Can't load zip content");
             //// TODO optimize setTimeout
-            //window.setTimeout(function() {
-            //    contentWindow.setContent(zipFile, fileDirectory);
-            //}, 500);
+            window.setTimeout(function() {
+                contentWindow.setContent(zipFile, fileDirectory);
+            }, 500);
         }
     }
 

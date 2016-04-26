@@ -1,6 +1,7 @@
 /* Copyright (c) 2013-2016 The TagSpaces Authors.
  * Use of this source code is governed by the MIT license which can be found in the LICENSE.txt file. */
 /* globals Handlebars */
+/* globals Nanobar */
 /* globals marked */
 "use strict";
 
@@ -113,7 +114,15 @@ function showContentFilePreviewDialog(containFile) {
 
     var fileContent = $("<pre/>").text(previewText);
     var $htmlContent = $('#htmlContent');
+    var nanobar = new Nanobar({
+        bg : '#42BEDB', //(optional) background css property, '#000' by default
+        target: document.getElementById('nanoBar'), //(optional) Where to put the progress bar, nanobar will be fixed to top of document if target is null
+        // id for new nanobar
+        id: 'nanoBar' // (optional) id for nanobar d
+    });
 
+    var progressChunk = parseInt(byteLength/100);
+    var currentProgress = 0	;
 
     $.post("previewDialog.html", function(uiTPL){
         //console.log("Load modal " + uiTPL);
@@ -127,8 +136,22 @@ function showContentFilePreviewDialog(containFile) {
             backdrop: 'static',
             show: true
         });
+        for (var i = 0; i < byteLength; i++) {
+            var check = (( i % progressChunk)==0);
+            if(check) {
+                currentProgress++;
+                if(currentProgress<=100) {
+                    nanobar.go(currentProgress);
+                }
+            }
+            previewText += String.fromCharCode(unitArr[i]);
+        }
+    })
+    .always(function() {
+        window.setTimeout(function() {
+            document.getElementById('nanoBar').remove();
+        }, 1000);
     });
-
 }
 
 function setContent(content, fileDirectory) {
