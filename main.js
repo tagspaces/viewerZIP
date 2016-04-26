@@ -1,6 +1,6 @@
 /* Copyright (c) 2013-2016 The TagSpaces Authors.
  * Use of this source code is governed by the MIT license which can be found in the LICENSE.txt file. */
-
+/* globals Handlebars */
 /* globals marked */
 "use strict";
 
@@ -119,7 +119,6 @@ function showContentFilePreviewDialog(containFile) {
         //console.log("Load modal " + uiTPL);
         if ($('#previewDialog').length < 1) {
             var uiTemplate = Handlebars.compile(uiTPL);
-            console.debug(uiTemplate);
             $('body').append(uiTemplate());
         }
         var dialogPreview = $('#previewDialog');
@@ -151,6 +150,11 @@ function setContent(content, fileDirectory) {
     $htmlContent.append("<p><h4> Contents of file " + fileDirectory + "</h4></p>");
     var ulFiles = $htmlContent.append("<ul/>");
     var zipFile = content;
+    function showPreviewDialog(event) {
+        event.preventDefault();
+        var containFile = zipFile.files[$(this).text()];
+        showContentFilePreviewDialog(containFile);
+    }
     //console.debug(zipFile);
     if (!!Object.keys(zipFile.files) &&
         (typeof zipFile !== 'function' ||
@@ -160,11 +164,7 @@ function setContent(content, fileDirectory) {
                 continue;
             }
             var linkToFile = $('<a>').attr('href', '#').text(fileName);
-            linkToFile.click(function (event) {
-                event.preventDefault();
-                var containFile = zipFile.files[$(this).text()];
-                showContentFilePreviewDialog(containFile);
-            });
+            linkToFile.click(showPreviewDialog);
             var liFile = $('<li/>').css('list-style-type', 'none').append(linkToFile);
             ulFiles.append(liFile);
         }
