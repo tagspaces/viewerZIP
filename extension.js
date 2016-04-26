@@ -3,125 +3,82 @@
 
 /*jshint loopfunc: true */
 
-define(function(require, exports, module) {
-  "use strict";
+define(function (require, exports, module) {
+    "use strict";
 
-  var extensionID = "viewerZIP"; // ID should be equal to the directory name where the ext. is located
-  var extensionSupportedFileTypes = ["zip"];
+    var extensionID = "viewerZIP"; // ID should be equal to the directory name where the ext. is located
+    var extensionSupportedFileTypes = ["zip"];
+    var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
+    console.log("Loading " + extensionID);
 
-  console.log("Loading " + extensionID);
-  //nanobar progress
-  var Nanobar = require('ext/viewerZIP/libs/nanobar/nanobar.min');
-  var TSCORE = require("tscore");
-  var JSZip = require("jszip");
-  var maxPreviewSize = (1024 * 3); //3kb limit for preview
-  var extensionDirectory = TSCORE.Config.getExtensionPath() + "/" + extensionID;
+    var TSCORE = require("tscore");
+    var JSZip = require("jszip");
+    var extensionDirectory = TSCORE.Config.getExtensionPath() + "/" + extensionID;
 
-  var nanobar = new Nanobar( {
-	  bg : '#0000ff', //(optional) background css property, '#000' by default
-	  id :  'nanobar_div' //(optional) id for nanobar div
-  });
+    var zip2htmlConverter;
+    var containerElID;
+    var currentFilePath;
+    var $containerElement;
 
-  function showContentFilePreviewDialog(containFile) {
-    var unitArr = containFile.asUint8Array();
-    var previewText = "";
-    var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
+    function init(filePath, containerElementID) {
+        console.log("Initalization Browser ZIP Viewer...");
+        containerElID = containerElementID;
+        $containerElement = $('#' + containerElID);
 
-    //--nanobar settings--
-	var progressChunk = parseInt(byteLength/100);
-	var currentProgress = 0	;
-    for (var i = 0; i < byteLength; i++) {
-	   //--nanobar settings--
-	  var check = (( i % progressChunk)==0);
-      if(check) {
-		  currentProgress++;
-          if(currentProgress<=100) nanobar.go(currentProgress);
-	  }
-	  //--------------------
-      previewText += String.fromCharCode(unitArr[i]);
-    }
-	nanobar.go(100); //set to 100% at the end
-
-    var fileContent = $("<pre/>").text(previewText);
-    require(['text!' + extensionDirectory + '/previewDialog.html'], function(uiTPL) {
-
-      if ($('#previewDialog').length < 1) {
-        var uiTemplate = Handlebars.compile(uiTPL);
-        $('body').append(uiTemplate());
-      }
-      var dialogPreview = $('#previewDialog');
-      dialogPreview.find('.modal-body').empty().append(fileContent);
-      dialogPreview.modal({
-        backdrop: 'static',
-        show: true
-      });
-    });
-  }
-
-  function createZipPrewiew(filePath, elementID) {
-    var $parent = $('#' + elementID);
-    var $previewElement = $('<div/>').css({
-      'overflow': 'auto',
-      'padding': '5px',
-      'background-color': 'white',
-      'fontSize': 12,
-      'width': '100%',
-      'height': '100%',
-    }).appendTo($parent);
-    //.width($parent.width()).height($parent.height()).appendTo($parent);
-
-    TSCORE.showLoadingAnimation();
-
-    TSCORE.IO.getFileContentPromise(filePath).then(function(content) {
-      var zipFile = new JSZip(content);
-      $previewElement.append("<p> Contents of file " + filePath + "</p>");
-      var ulFiles = $previewElement.append("<ul/>");
-
-      for (var fileName in zipFile.files) {
-        if (zipFile.files[fileName].dir === true) {
-          continue;
-        }
-        var linkToFile = $('<a>').attr('href', '#').text(fileName);
-        linkToFile.click(function(event) {
-          event.preventDefault();
-          var containFile = zipFile.files[$(this).text()];
-          showContentFilePreviewDialog(containFile);
+        currentFilePath = filePath;
+        $containerElement.empty();
+        $containerElement.css("background-color", "white");
+        $containerElement.append($('<iframe>', {
+            sandbox: "allow-same-origin allow-scripts allow-modals",
+            id: "iframeViewer",
+            "nwdisable": "",
+            //"nwfaketop": "",
+            "src": extensionDirectory + "/index.html?&locale=" + TSCORE.currentLanguage,
+        }));
+        TSCORE.IO.getFileContentPromise(filePath).then(function (content) {
+            exports.setContent(content);
+        }, function (error) {
+            TSCORE.hideLoadingAnimation();
+            TSCORE.showAlertDialog("Loading " + filePath + " failed.");
+            console.error("Loading file " + filePath + " failed " + error);
         });
-        var liFile = $('<li/>').css('list-style-type', 'none').append(linkToFile);
-        ulFiles.append(liFile);
-      }
+    }
 
-      TSCORE.hideLoadingAnimation();
-    },
-    function(error) {
-      $previewElement.append("<p> Error in getFileContent :" + error + "</p>");
-    });
-  }
+    function viewerMode() {
 
-  function init(filePath, elementID) {
-    console.log("Initalization Browser ZIP Viewer...");
-    createZipPrewiew(filePath, elementID);
-  }
+        console.log("viewerMode not supported on this extension");
+    }
 
-  function viewerMode() {
+    function setContent(content) {
+        var zipFile = new JSZip(content);
+        console.log(zipFile);
 
-    console.log("viewerMode not supported on this extension");
-  }
+        var fileDirectory = TSCORE.TagUtils.extractContainingDirectoryPath(currentFilePath);
+        if (isWeb) {
+            fileDirectory = TSCORE.TagUtils.extractContainingDirectoryPath(location.href) + "/" + fileDirectory;
+        }
 
-  function setContent(content) {
+        var contentWindow = document.getElementById("iframeViewer").contentWindow;
+        if (typeof contentWindow.setContent === "function") {
+            contentWindow.setContent(zipFile, fileDirectory);
+        } else {
+            TSCORE.showAlertDialog("Can't load zip content");
+            throw new TypeError("Can't load zip content");
+            //// TODO optimize setTimeout
+            //window.setTimeout(function() {
+            //    contentWindow.setContent(zipFile, fileDirectory);
+            //}, 500);
+        }
+    }
 
-    console.log("setContent not supported on this extension");
-  }
+    function getContent() {
+        console.log("getContent not supported on this extension");
+    }
 
-  function getContent() {
-
-    console.log("getContent not supported on this extension");
-  }
-
-  exports.init = init;
-  exports.getContent = getContent;
-  exports.setContent = setContent;
-  exports.viewerMode = viewerMode;
-  //exports.setFileType = setFileType;
+    exports.init = init;
+    exports.getContent = getContent;
+    exports.setContent = setContent;
+    exports.viewerMode = viewerMode;
+    //exports.setFileType = setFileType;
 
 });
