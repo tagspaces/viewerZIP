@@ -114,15 +114,6 @@ function showContentFilePreviewDialog(containFile) {
 
     var fileContent = $("<pre/>").text(previewText);
     var $htmlContent = $('#htmlContent');
-    var nanobar = new Nanobar({
-        bg : '#42BEDB', //(optional) background css property, '#000' by default
-        target: document.getElementById('nanoBar'), //(optional) Where to put the progress bar, nanobar will be fixed to top of document if target is null
-        // id for new nanobar
-        id: 'nanoBar' // (optional) id for nanobar d
-    });
-
-    var progressChunk = parseInt(byteLength/100);
-    var currentProgress = 0	;
 
     $.post("previewDialog.html", function(uiTPL){
         //console.log("Load modal " + uiTPL);
@@ -136,8 +127,20 @@ function showContentFilePreviewDialog(containFile) {
             backdrop: 'static',
             show: true
         });
+
+    })
+    .done(function(){
+        var nanobar = new Nanobar({
+            bg : '#42BEDB', //(optional) background css property, '#000' by default
+            target: document.getElementById('nanoBar'), //(optional) Where to put the progress bar, nanobar will be fixed to top of document if target is null
+            // id for new nanobar
+            id: 'nanoBar' // (optional) id for nanobar d
+        });
+
+        var progressChunk = parseInt(byteLength/100);
+        var currentProgress = 0	;
         for (var i = 0; i < byteLength; i++) {
-            var check = (( i % progressChunk)==0);
+            var check = (( i % progressChunk)===0);
             if(check) {
                 currentProgress++;
                 if(currentProgress<=100) {
