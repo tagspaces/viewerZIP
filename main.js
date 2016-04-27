@@ -68,11 +68,7 @@ $(document).ready(function() {
   $(document).ready(function() {
     $("#printButton").on("click" , function() {
       $(".dropdown-menu").dropdown('toggle');
-
       window.print();
-      //location.reload();
-      window.stop();
-      //window.close();
     });
   });
   if (isCordova) {
