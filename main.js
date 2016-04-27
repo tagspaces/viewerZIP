@@ -1,8 +1,6 @@
 /* Copyright (c) 2013-2016 The TagSpaces Authors.
 	* Use of this source code is governed by the MIT license which can be found in the LICENSE.txt file. */
-/* globals Handlebars */
-/* globals Nanobar */
-/* globals marked */
+/* globals Handlebars, Nanobar, marked */
 "use strict";
 
 var isCordova;
