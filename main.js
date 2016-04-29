@@ -57,9 +57,6 @@ $(document).ready(function() {
   });
   document.getElementById("aboutButton").addEventListener("click", showModal);
   function showModal(e){
-    $("#aboutButton").click(function() {
-      $("#aboutExtensionModal").modal({show: true});
-    });
     if (!e) {
       e = window.event;
     }
@@ -86,11 +83,8 @@ $(document).ready(function() {
   $(document).ready(function() {
     $("#printButton").on("click" , function() {
       $(".dropdown-menu").dropdown('toggle');
-
       window.print();
-      //location.reload();
       window.stop();
-      //window.close();
     });
 
   });
