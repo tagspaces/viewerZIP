@@ -52,6 +52,24 @@ $(document).ready(function() {
       });
     });
   });
+  $("#aboutButton").click(function() {
+    $("#aboutExtensionModal").modal({show: true});
+  });
+  document.getElementById("aboutButton").addEventListener("click", showModal);
+  function showModal(e){
+    $("#aboutButton").click(function() {
+      $("#aboutExtensionModal").modal({show: true});
+    });
+    if (!e) {
+      e = window.event;
+    }
+    //IE9 & Other Browsers
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }//IE8 and Lower
+    else {
+    }
+  }
 
   function handleLinks($element) {
     $element.find("a[href]").each(function() {
@@ -74,6 +92,7 @@ $(document).ready(function() {
       window.stop();
       //window.close();
     });
+
   });
   if (isCordova) {
     $("#printButton").hide();
