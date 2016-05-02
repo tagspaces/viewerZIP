@@ -7,10 +7,8 @@ var isCordova;
 
 var isWin;
 var isWeb;
-
-var $htmlContent;
-
 var JSZip;
+var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
 $(document).ready(function() {
   function getParameterByName(name) {
@@ -33,39 +31,41 @@ $(document).ready(function() {
     event.preventDefault();
   });
 
-  $(document).ready(function() {
-    $('#aboutExtensionModal').on('show.bs.modal' , function() {
-      $.ajax({
-        url: 'README.md' ,
-        type: 'GET'
-      }).done(function(zipData) {
-        console.log(zipData);
-        if (marked) {
-          var modalBody = $("#aboutExtensionModal .modal-body");
-          modalBody.html(marked(zipData , {sanitize: true}));
-          handleLinks(modalBody);
-        } else {
-          console.log("markdown to html transformer not found");
-        }
-      }).fail(function(data) {
-        console.warn("Loading file failed " + data);
-      });
+  $('#aboutExtensionModal').on('show.bs.modal' , function() {
+    $.ajax({
+      url: 'README.md' ,
+      type: 'GET'
+    }).done(function(zipData) {
+      console.log(zipData);
+      if (marked) {
+        var modalBody = $("#aboutExtensionModal .modal-body");
+        modalBody.html(marked(zipData , {sanitize: true}));
+        handleLinks(modalBody);
+      } else {
+        console.log("markdown to html transformer not found");
+      }
+    }).fail(function(data) {
+      console.warn("Loading file failed " + data);
     });
   });
-  $("#aboutButton").click(function() {
+
+  $("#aboutButton").on("click", function(e) {
+    //e.stopPropagation();
     $("#aboutExtensionModal").modal({show: true});
+    return false;
   });
-  document.getElementById("aboutButton").addEventListener("click", showModal);
-  function showModal(e){
-    if (!e) {
-      e = window.event;
-    }
-    //IE9 & Other Browsers
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }//IE8 and Lower
-    else {
-    }
+
+  $("#printButton").on("click", function(e) {
+    window.print();
+    $(".extMainMenu").dropdown('hide');
+    //e.stopPropagation();
+    return false;
+    //window.stop();
+  });
+
+  if (isCordova) {
+    $("#printButton").hide();
+    window.close();
   }
 
   function handleLinks($element) {
@@ -77,20 +77,6 @@ $(document).ready(function() {
         window.parent.postMessage(JSON.stringify(msg) , "*");
       });
     });
-  }
-
-  $htmlContent = $("#htmlContent");
-  $(document).ready(function() {
-    $("#printButton").on("click" , function() {
-      $(".dropdown-menu").dropdown('toggle');
-      window.print();
-      window.stop();
-    });
-
-  });
-  if (isCordova) {
-    $("#printButton").hide();
-    window.close();
   }
 
   // Init internationalization
@@ -108,9 +94,7 @@ $(document).ready(function() {
   }
 });
 
-var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 function showContentFilePreviewDialog(containFile) {
-
   var unitArr = containFile.asUint8Array();
   var previewText = "";
   var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
