@@ -50,17 +50,11 @@ $(document).ready(function() {
   });
 
   $("#aboutButton").on("click", function(e) {
-    //e.stopPropagation();
     $("#aboutExtensionModal").modal({show: true});
-    return false;
   });
 
   $("#printButton").on("click", function(e) {
     window.print();
-    $(".extMainMenu").dropdown('hide');
-    //e.stopPropagation();
-    return false;
-    //window.stop();
   });
 
   if (isCordova) {
