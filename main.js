@@ -7,10 +7,8 @@ var isCordova;
 
 var isWin;
 var isWeb;
-
-var $htmlContent;
-
 var JSZip;
+var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
 $(document).ready(function() {
   function getParameterByName(name) {
@@ -33,25 +31,35 @@ $(document).ready(function() {
     event.preventDefault();
   });
 
-  $(document).ready(function() {
-    $('#aboutExtensionModal').on('show.bs.modal' , function() {
-      $.ajax({
-        url: 'README.md' ,
-        type: 'GET'
-      }).done(function(zipData) {
-        console.log(zipData);
-        if (marked) {
-          var modalBody = $("#aboutExtensionModal .modal-body");
-          modalBody.html(marked(zipData , {sanitize: true}));
-          handleLinks(modalBody);
-        } else {
-          console.log("markdown to html transformer not found");
-        }
-      }).fail(function(data) {
-        console.warn("Loading file failed " + data);
-      });
+  $('#aboutExtensionModal').on('show.bs.modal' , function() {
+    $.ajax({
+      url: 'README.md' ,
+      type: 'GET'
+    }).done(function(zipData) {
+      console.log(zipData);
+      if (marked) {
+        var modalBody = $("#aboutExtensionModal .modal-body");
+        modalBody.html(marked(zipData , {sanitize: true}));
+        handleLinks(modalBody);
+      } else {
+        console.log("markdown to html transformer not found");
+      }
+    }).fail(function(data) {
+      console.warn("Loading file failed " + data);
     });
   });
+
+  $("#aboutButton").on("click", function(e) {
+    $("#aboutExtensionModal").modal({show: true});
+  });
+
+  $("#printButton").on("click", function(e) {
+    window.print();
+  });
+
+  if (isCordova) {
+    $("#printButton").hide();
+  }
 
   function handleLinks($element) {
     $element.find("a[href]").each(function() {
@@ -62,18 +70,6 @@ $(document).ready(function() {
         window.parent.postMessage(JSON.stringify(msg) , "*");
       });
     });
-  }
-
-  $htmlContent = $("#htmlContent");
-  $(document).ready(function() {
-    $("#printButton").on("click" , function() {
-      $(".dropdown-menu").dropdown('toggle');
-      window.print();
-    });
-  });
-  if (isCordova) {
-    $("#printButton").hide();
-    window.close();
   }
 
   // Init internationalization
@@ -91,9 +87,7 @@ $(document).ready(function() {
   }
 });
 
-var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 function showContentFilePreviewDialog(containFile) {
-
   var unitArr = containFile.asUint8Array();
   var previewText = "";
   var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
