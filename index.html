@@ -10,11 +10,25 @@
   <script type="text/javascript" src="../../libs/i18next/i18next.min.js"></script>
   <script type="text/javascript" src="../../libs/marked/marked.min.js"></script>
   <script type="text/javascript" src="../../libs/nanobar/nanobar.min.js"></script>
+  <script type="text/javascript" src="../../libs/mousetrap/mousetrap.min.js"></script>
+  <script type="text/javascript" src="libs/jquery.highlight.js"></script>
+  <script type="text/javascript" src="libs/extCommons/common.js"></script>
   <script type="text/javascript" src="main.js"></script>
   <link rel="stylesheet" href="extension.css"/>
   <base>
 </head>
 <body>
+<div id="searchToolbar" style="display: none;">
+  <div class="flexLayout">
+    <button class="btn btn-link" id="clearSearchExtButton" data-i18n="[title]ns.viewerZIP:cancelSearch">
+      <i class="fa fa-lg fa-eraser"></i>
+    </button>
+    <input class="flexMaxWidth" id="searchBox" type="text" data-i18n="[placeholder]ns.viewerZIP:findInDocument">
+    <button class="btn btn-link" id="searchExtButton" data-i18n="[title]ns.viewerZIP:startSearch">
+      <i class="fa fa-lg fa-binoculars"></i>
+    </button>
+  </div>
+</div>
 <div id="htmlContent"></div>
 <div class="btn-group dropup extMainMenu">
   <button type="button" class="btn roundButton dropdown-toggle viewerMainMenuButton" data-toggle="dropdown">
