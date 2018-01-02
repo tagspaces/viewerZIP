@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2016 The TagSpaces Authors.
+/* Copyright (c) 2013-present The TagSpaces Authors.
  * Use of this source code is governed by the MIT license which can be found in the LICENSE.txt file. */
 /* globals Handlebars, Nanobar, marked */
 "use strict";
@@ -6,8 +6,8 @@
 var isCordova;
 
 var isWin;
-var isWeb;
-var JSZip;
+var isWeb = (document.URL.startsWith('http') && !document.URL.startsWith('http://localhost:1212/'));
+// var JSZip;
 var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
 $(document).ready(function() {
@@ -23,18 +23,18 @@ $(document).ready(function() {
   var extSettings;
   loadExtSettings();
 
-  isCordova = parent.isCordova;
-  isWin = parent.isWin;
-  isWeb = parent.isWeb;
+  // isCordova = parent.isCordova;
+  // isWin = parent.isWin;
 
   // Init internationalization
-  $.i18n.init({
+  i18next.init({
     ns: {namespaces: ['ns.viewerZIP']} ,
     debug: true ,
     lng: locale ,
     fallbackLng: 'en_US'
   } , function() {
-    $('[data-i18n]').i18n();
+    jqueryI18next.init(i18next, $);
+    $('[data-i18n]').localize();
   });
 
   function loadExtSettings() {
