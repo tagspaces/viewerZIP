@@ -6,8 +6,9 @@
 var isCordova;
 
 var isWin;
+var loadContentExternally = true;
 var isWeb = (document.URL.startsWith('http') && !document.URL.startsWith('http://localhost:1212/'));
-// var JSZip;
+var JSZip;
 var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
 $(document).ready(function() {
