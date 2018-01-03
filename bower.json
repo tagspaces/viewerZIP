@@ -5,8 +5,10 @@
   "type": "viewer",
   "version": "1.0.0",
   "dependencies": {
-    "nanobar": "git+https://github.com/jacoborus/nanobar.git#f424b641aebf3f7eaa891325e3552eeb6b607c51"
-  },
+    "nanobar": "~0.4.2",
+    "handlebars": "~4.0.11",
+    "jszip": "3.1.5"
+    },
   "devDependencies": {},
   "authors": [
     "TagSpaces Authors - http://tagspaces.org",
