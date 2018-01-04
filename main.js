@@ -42,7 +42,7 @@ $(document).ready(function() {
   function loadExtSettings() {
     extSettings = JSON.parse(localStorage.getItem('viewerZIPSettings'));
   }
-  
+
   JSZipUtils.getBinaryContent(filePath , function(err, data) {
     if (err) {
       throw err; // or handle err
@@ -50,6 +50,40 @@ $(document).ready(function() {
     JSZip.loadAsync(data).then(function(data) {
       loadZipFile(data, filePath);
     });
+    //JSZip.loadAsync(data).then(function (zip) {
+    //  var re = /(.jpg|.png|.gif|.ps|.jpeg)$/;
+    //  console.log(zip)
+    //  console.log(zip.files)
+    //  var promises = Object.keys(zip.files).filter(function(fileName) {
+    //    // don't consider non image files
+    //    console.log(fileName);
+    //    return re.test(fileName.toLowerCase());
+    //  })
+    //});
+    //  Object.keys(zip.files).map(function (fileName) {
+    //    var file = zip.files[fileName];
+    //    console.log(file);
+    //    return file.async("text").then(function (blob) {
+    //      console.log(blob);
+    //      return [
+    //        fileName,  // keep the link between the file name and the content
+    //        URL.createObjectURL(blob) // create an url. img.src = URL.createObjectURL(...) will work
+    //      ];
+    //    });
+    //  });
+    //  // `promises` is an array of promises, `Promise.all` transforms it
+    //  // into a promise of arrays
+    //  return Promise.all(promises);
+    //}).then(function (result) {
+    //  // we have here an array of [fileName, url]
+    //  // if you want the same result as imageSrc:
+    //  return result.reduce(function (acc, val) {
+    //    acc[val[0]] = val[1];
+    //    return acc;
+    //  }, {});
+    //}).catch(function (e) {
+    //  console.error(e);
+    //});
   });
 });
 
@@ -76,8 +110,15 @@ function loadZipFile(zipFile, filePath) {
   function showPreviewDialog(event) {
     event.preventDefault();
     var containFile = zipFile.files[$(this).text()];
-    console.log(containFile);
-    showContentFilePreviewDialog(containFile);
+    containFile.options.compression = 'STORE';
+    containFile.async("text").then(function (blob) {
+      showContentFilePreviewDialog(blob);
+      //return [
+      //  fileName,  // keep the link between the file name and the content
+      //  URL.createObjectURL(blob) // create an url. img.src = URL.createObjectURL(...) will work
+      //];
+    });
+    // showContentFilePreviewDialog(containFile);
   }
 
   if (!!Object.keys(zipFile.files) &&
@@ -100,14 +141,14 @@ function loadZipFile(zipFile, filePath) {
 function showContentFilePreviewDialog(containFile) {
   //console.log('showContentFilePreviewDialog', containFile);
   //console.log(containFile._data.compressedContent);
-  var unitArr = containFile._data.compressedContent;
+  //var unitArr = containFile._data.compressedContent;
   var previewText = '';
-  var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
-
-  for (var i = 0; i < byteLength; i++) {
-    previewText += String.fromCharCode(unitArr[i]);
-  }
-
+  //var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
+  //
+  //for (var i = 0; i < byteLength; i++) {
+  //  previewText += String.fromCharCode(unitArr[i]);
+  //}
+  previewText = containFile;
   var fileContent = $('<pre/>').text(previewText);
 
   $.post('previewDialog.html' , function(uiTPL) {
