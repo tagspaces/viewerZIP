@@ -1,25 +1,26 @@
 /* Copyright (c) 2013-present The TagSpaces Authors.
  * Use of this source code is governed by the MIT license which can be found in the LICENSE.txt file. */
 /* globals Handlebars, Nanobar, marked */
-"use strict";
+'use strict';
 
 var isCordova;
 
 var isWin;
-var loadContentExternally = true;
+var loadContentExternally = false;
 var isWeb = (document.URL.startsWith('http') && !document.URL.startsWith('http://localhost:1212/'));
-var JSZip;
+var JSZip, JSZipUtils;
 var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
 $(document).ready(function() {
   function getParameterByName(name) {
-    name = name.replace(/[\[]/ , "\\\[").replace(/[\]]/ , "\\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)") ,
+    name = name.replace(/[\[]/ , '\\\[').replace(/[\]]/ , '\\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)') ,
             results = regex.exec(location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g , " "));
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g , ' '));
   }
 
-  var locale = getParameterByName("locale");
+  var locale = getParameterByName('locale');
+  var filePath = getParameterByName('file');
 
   var extSettings;
   loadExtSettings();
@@ -39,24 +40,78 @@ $(document).ready(function() {
   });
 
   function loadExtSettings() {
-    extSettings = JSON.parse(localStorage.getItem("viewerZIPSettings"));
+    extSettings = JSON.parse(localStorage.getItem('viewerZIPSettings'));
   }
+
+  var zipFile;
+  new JSZip.external.Promise(function (resolve, reject) {
+    JSZipUtils.getBinaryContent( filePath, function(err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  }).then(function (data) {
+    return JSZip.loadAsync(data);
+  })
+  .then(function (data) {
+    zipFile = data;
+    var $zipContent = $('#zipContent');
+    $zipContent.append(zipFile);
+
+    // if (filePath.indexOf('file://') === 0) {
+    //   filePath = filePath.substring(('file://').length , filePath.length);
+    // }
+
+    $zipContent.append('<div/>').css({
+      'overflow': 'auto' ,
+      'padding': '5px' ,
+      'background-color': 'white' ,
+      'fontSize': 12 ,
+      'width': '100%' ,
+      'height': '100%'
+    });
+    $zipContent.append('<p><h4> Contents of file ' + filePath + '</h4></p>');
+    var ulFiles = $zipContent.append('<ul/>');
+
+    function showPreviewDialog(event) {
+      event.preventDefault();
+      var containFile = zipFile.files[$(this).text()];
+      showContentFilePreviewDialog(containFile);
+    }
+
+    if (!!Object.keys(zipFile.files) &&
+      (typeof zipFile !== 'function' ||
+      zipFile === null)) {
+      for (var fileName in zipFile.files) {
+        if (zipFile.files[fileName].dir === true) {
+          continue;
+        }
+        var linkToFile = $('<a>').attr('href' , '#').text(fileName);
+        linkToFile.click(showPreviewDialog);
+        var liFile = $('<li/>').css('list-style-type' , 'none').append(linkToFile);
+        ulFiles.append(liFile);
+      }
+    } else {
+      throw new TypeError('Object.keys called on non-object');
+    }
+  });
 });
 
 function showContentFilePreviewDialog(containFile) {
   var unitArr = containFile.asUint8Array();
-  var previewText = "";
+  var previewText = '';
   var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
 
   for (var i = 0; i < byteLength; i++) {
     previewText += String.fromCharCode(unitArr[i]);
   }
 
-  var fileContent = $("<pre/>").text(previewText);
-  var $htmlContent = $('#htmlContent');
+  var fileContent = $('<pre/>').text(previewText);
 
-  $.post("previewDialog.html" , function(uiTPL) {
-    //console.log("Load modal " + uiTPL);
+  $.post('previewDialog.html' , function(uiTPL) {
+    //console.log('Load modal ' + uiTPL);
     if ($('#previewDialog').length < 1) {
       var uiTemplate = Handlebars.compile(uiTPL);
       $('body').append(uiTemplate());
@@ -91,47 +146,4 @@ function showContentFilePreviewDialog(containFile) {
       document.getElementById('nanoBar').remove();
     } , 1000);
   });
-}
-
-function setContent(content , fileDirectory) {
-  var $htmlContent = $('#htmlContent');
-  $htmlContent.append(content);
-
-  if (fileDirectory.indexOf("file://") === 0) {
-    fileDirectory = fileDirectory.substring(("file://").length , fileDirectory.length);
-  }
-
-  $htmlContent.append('<div/>').css({
-    'overflow': 'auto' ,
-    'padding': '5px' ,
-    'background-color': 'white' ,
-    'fontSize': 12 ,
-    'width': '100%' ,
-    'height': '100%'
-  });
-  $htmlContent.append("<p><h4> Contents of file " + fileDirectory + "</h4></p>");
-  var ulFiles = $htmlContent.append("<ul/>");
-  var zipFile = content;
-
-  function showPreviewDialog(event) {
-    event.preventDefault();
-    var containFile = zipFile.files[$(this).text()];
-    showContentFilePreviewDialog(containFile);
-  }
-
-  if (!!Object.keys(zipFile.files) &&
-          (typeof zipFile !== 'function' ||
-          zipFile === null)) {
-    for (var fileName in zipFile.files) {
-      if (zipFile.files[fileName].dir === true) {
-        continue;
-      }
-      var linkToFile = $('<a>').attr('href' , '#').text(fileName);
-      linkToFile.click(showPreviewDialog);
-      var liFile = $('<li/>').css('list-style-type' , 'none').append(linkToFile);
-      ulFiles.append(liFile);
-    }
-  } else {
-    throw new TypeError("Object.keys called on non-object");
-  }
 }
