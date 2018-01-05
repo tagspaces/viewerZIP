@@ -6,7 +6,6 @@
 var isCordova;
 
 var isWin;
-var loadContentExternally = false;
 var isWeb = (document.URL.startsWith('http') && !document.URL.startsWith('http://localhost:1212/'));
 var JSZip, JSZipUtils;
 var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
@@ -52,8 +51,6 @@ $(document).ready(function() {
     });
     //JSZip.loadAsync(data).then(function (zip) {
     //  var re = /(.jpg|.png|.gif|.ps|.jpeg)$/;
-    //  console.log(zip)
-    //  console.log(zip.files)
     //  var promises = Object.keys(zip.files).filter(function(fileName) {
     //    // don't consider non image files
     //    console.log(fileName);
@@ -62,7 +59,6 @@ $(document).ready(function() {
     //});
     //  Object.keys(zip.files).map(function (fileName) {
     //    var file = zip.files[fileName];
-    //    console.log(file);
     //    return file.async("text").then(function (blob) {
     //      console.log(blob);
     //      return [
@@ -118,7 +114,6 @@ function loadZipFile(zipFile, filePath) {
       //  URL.createObjectURL(blob) // create an url. img.src = URL.createObjectURL(...) will work
       //];
     });
-    // showContentFilePreviewDialog(containFile);
   }
 
   if (!!Object.keys(zipFile.files) &&
@@ -139,12 +134,10 @@ function loadZipFile(zipFile, filePath) {
 }
 
 function showContentFilePreviewDialog(containFile) {
-  //console.log('showContentFilePreviewDialog', containFile);
-  //console.log(containFile._data.compressedContent);
   //var unitArr = containFile._data.compressedContent;
   var previewText = '';
   //var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
-  //
+
   //for (var i = 0; i < byteLength; i++) {
   //  previewText += String.fromCharCode(unitArr[i]);
   //}
