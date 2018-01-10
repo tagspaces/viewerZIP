@@ -12,21 +12,21 @@
   <script type="text/javascript" src="../legacy-ext/libs/jquery-i18next/jquery-i18next.min.js"></script>
   <script type="text/javascript" src="../legacy-ext/libs/marked/marked.min.js"></script>
   <script type="text/javascript" src="../legacy-ext/libs/mousetrap/mousetrap.min.js"></script>
+  <script type="text/javascript" src="../legacy-ext/common.js"></script>
   <script type="text/javascript" src="libs/nanobar/nanobar.min.js"></script>
   <script type="text/javascript" src="libs/jquery.highlight.js"></script>
   <script type="text/javascript" src="main.js"></script>
-  <script type="text/javascript" src="../legacy-ext/common.js"></script>
   <link rel="stylesheet" href="extension.css"/>
   <base>
 </head>
 <body>
 <div id="searchToolbar" style="display: none;">
   <div class="flexLayout">
-    <button class="btn btn-link" id="clearSearchExtButton" data-i18n="[title]ns.viewerZIP:cancelSearch">
+    <button class="btn btn-link" id="clearSearchExtButton" data-i18n="[title]cancelSearch">
       <i class="fa fa-lg fa-eraser"></i>
     </button>
-    <input class="flexMaxWidth" id="searchBox" type="text" data-i18n="[placeholder]ns.viewerZIP:findInDocument">
-    <button class="btn btn-link" id="searchExtButton" data-i18n="[title]ns.viewerZIP:startSearch">
+    <input class="flexMaxWidth" id="searchBox" type="text" data-i18n="[placeholder]findInDocument">
+    <button class="btn btn-link" id="searchExtButton" data-i18n="[title]startSearch">
       <i class="fa fa-lg fa-binoculars"></i>
     </button>
   </div>
@@ -42,14 +42,14 @@
     </li>
     <li class="divider"></li>
     <li><a id="findInFile">
-      <i class="fa fa-binoculars fa-lg fa-fw"></i>&nbsp;<span data-i18n="ns.viewerZIP:findInDocument"></span>
+      <i class="fa fa-binoculars fa-lg fa-fw"></i>&nbsp;<span data-i18n="findInDocument"></span>
     </a></li>
     <li class="divider"></li>
     <li><a id="printButton">
-      <i class="fa fa-print fa-lg fa-fw"></i>&nbsp;<span data-i18n="ns.viewerZIP:print"></span>
+      <i class="fa fa-print fa-lg fa-fw"></i>&nbsp;<span data-i18n="print"></span>
     </a></li>
     <li><a id="aboutButton">
-      <i class="fa fa-comment fa-lg fa-fw"></i>&nbsp;<span data-i18n="ns.viewerZIP:about"></span>
+      <i class="fa fa-comment fa-lg fa-fw"></i>&nbsp;<span data-i18n="about"></span>
     </a></li>
   </ul>
 </div>
@@ -58,7 +58,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button id="closeAboutDialogButton" type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i></button>
-        <h4 class="modal-title" data-i18n="ns.viewerZIP:aboutTitle"></h4>
+        <h4 class="modal-title" data-i18n="aboutTitle"></h4>
       </div>
       <div class="modal-body"></div>
       <div class="modal-footer">

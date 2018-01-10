@@ -27,16 +27,7 @@ $(document).ready(function() {
   // isCordova = parent.isCordova;
   // isWin = parent.isWin;
 
-  // Init internationalization
-  i18next.init({
-    ns: {namespaces: ['ns.viewerZIP']} ,
-    debug: true ,
-    lng: locale ,
-    fallbackLng: 'en_US'
-  } , function() {
-    jqueryI18next.init(i18next, $);
-    $('[data-i18n]').localize();
-  });
+  initI18N(locale, 'ns.viewerZIP.json');
 
   function loadExtSettings() {
     extSettings = JSON.parse(localStorage.getItem('viewerZIPSettings'));
