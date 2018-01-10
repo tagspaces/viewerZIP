@@ -1,3 +1,4 @@
+node_modules/
 libs/**/Gruntfile.js
 libs/**/.npmignore
 libs/**/HELP*
@@ -20,3 +21,5 @@ libs/**/lib/
 libs/**/docs/
 libs/**/documentation/
 libs/**/vendor/
+libs/**/examples/
+libs/**/demos/
