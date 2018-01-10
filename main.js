@@ -11,23 +11,12 @@ var JSZip, JSZipUtils;
 var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
 $(document).ready(function() {
-  function getParameterByName(name) {
-    name = name.replace(/[\[]/ , '\\\[').replace(/[\]]/ , '\\\]');
-    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)') ,
-            results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g , ' '));
-  }
-
   var locale = getParameterByName('locale');
   var filePath = getParameterByName('file');
+  initI18N(locale, 'ns.viewerZIP.json');
 
   var extSettings;
   loadExtSettings();
-
-  // isCordova = parent.isCordova;
-  // isWin = parent.isWin;
-
-  initI18N(locale, 'ns.viewerZIP.json');
 
   function loadExtSettings() {
     extSettings = JSON.parse(localStorage.getItem('viewerZIPSettings'));
@@ -125,13 +114,13 @@ function loadZipFile(zipFile, filePath) {
 }
 
 function showContentFilePreviewDialog(containFile) {
-  //var unitArr = containFile._data.compressedContent;
+  var unitArr = containFile;
   var previewText = '';
-  //var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
+  var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
 
-  //for (var i = 0; i < byteLength; i++) {
-  //  previewText += String.fromCharCode(unitArr[i]);
-  //}
+  for (var i = 0; i < byteLength; i++) {
+    previewText += String.fromCharCode(unitArr[i]);
+  }
   previewText = containFile;
   var fileContent = $('<pre/>').text(previewText);
 
