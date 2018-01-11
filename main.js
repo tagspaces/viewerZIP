@@ -3,10 +3,6 @@
 /* globals Handlebars, Nanobar, marked */
 'use strict';
 
-var isCordova;
-
-var isWin;
-var isWeb = (document.URL.startsWith('http') && !document.URL.startsWith('http://localhost:1212/'));
 var JSZip, JSZipUtils;
 var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
