@@ -4,27 +4,28 @@
 'use strict';
 
 var JSZip, JSZipUtils;
-var maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
+let maxPreviewSize = (1024 * 3) || {}; //3kb limit for preview
 
-$(document).ready(function() {
-  var locale = getParameterByName('locale');
-  var filePath = getParameterByName('file');
+$(document).ready(() => {
+  const locale = getParameterByName('locale');
+  const filePath = getParameterByName('file');
   initI18N(locale, 'ns.viewerZIP.json');
 
-  var extSettings;
+  let extSettings;
   loadExtSettings();
 
   function loadExtSettings() {
     extSettings = JSON.parse(localStorage.getItem('viewerZIPSettings'));
   }
 
-  JSZipUtils.getBinaryContent(filePath , function(err, data) {
+  JSZipUtils.getBinaryContent(filePath , (err, data) => {
     if (err) {
       throw err; // or handle err
     }
-    JSZip.loadAsync(data).then(function(data) {
+    JSZip.loadAsync(data).then((data) => {
       loadZipFile(data, filePath);
     });
+
     //JSZip.loadAsync(data).then(function (zip) {
     //  var re = /(.jpg|.png|.gif|.ps|.jpeg)$/;
     //  var promises = Object.keys(zip.files).filter(function(fileName) {
@@ -60,7 +61,7 @@ $(document).ready(function() {
 });
 
 function loadZipFile(zipFile, filePath) {
-  var $zipContent = $('#zipContent');
+  const $zipContent = $('#zipContent');
 
   $zipContent.append(zipFile);
 
@@ -77,13 +78,13 @@ function loadZipFile(zipFile, filePath) {
     'height': '100%'
   });
   $zipContent.append('<p><h4> Contents of file ' + filePath + '</h4></p>');
-  var ulFiles = $zipContent.append('<ul/>');
+  const ulFiles = $zipContent.append('<ul/>');
 
   function showPreviewDialog(event) {
     event.preventDefault();
-    var containFile = zipFile.files[$(this).text()];
+    const containFile = zipFile.files[$(this).text()];
     containFile.options.compression = 'STORE';
-    containFile.async("text").then(function (blob) {
+    containFile.async('text').then((blob) => {
       showContentFilePreviewDialog(blob);
       //return [
       //  fileName,  // keep the link between the file name and the content
@@ -95,13 +96,13 @@ function loadZipFile(zipFile, filePath) {
   if (!!Object.keys(zipFile.files) &&
     (typeof zipFile !== 'function' ||
     zipFile === null)) {
-    for (var fileName in zipFile.files) {
+    for (const fileName in zipFile.files) {
       if (zipFile.files[fileName].dir === true) {
         continue;
       }
-      var linkToFile = $('<a>').attr('href' , '#').text(fileName);
+      const linkToFile = $('<a>').attr('href' , '#').text(fileName);
       linkToFile.click(showPreviewDialog);
-      var liFile = $('<li/>').css('list-style-type' , 'none').append(linkToFile);
+      const liFile = $('<li/>').css('list-style-type' , 'none').append(linkToFile);
       ulFiles.append(liFile);
     }
   } else {
@@ -110,38 +111,38 @@ function loadZipFile(zipFile, filePath) {
 }
 
 function showContentFilePreviewDialog(containFile) {
-  var unitArr = containFile;
-  var previewText = '';
-  var byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
+  const unitArr = containFile;
+  let previewText = '';
+  const byteLength = (unitArr.byteLength > maxPreviewSize) ? maxPreviewSize : unitArr.byteLength;
 
-  for (var i = 0; i < byteLength; i++) {
+  for (let i = 0; i < byteLength; i++) {
     previewText += String.fromCharCode(unitArr[i]);
   }
   previewText = containFile;
-  var fileContent = $('<pre/>').text(previewText);
+  const fileContent = $('<pre/>').text(previewText);
 
-  $.post('previewDialog.html' , function(uiTPL) {
+  $.post('previewDialog.html' , (uiTPL) => {
     if ($('#previewDialog').length < 1) {
-      var uiTemplate = Handlebars.compile(uiTPL);
+      const uiTemplate = Handlebars.compile(uiTPL);
       $('body').append(uiTemplate());
     }
-    var dialogPreview = $('#previewDialog');
+    const dialogPreview = $('#previewDialog');
     dialogPreview.find('.modal-body').empty().append(fileContent);
     dialogPreview.modal({
       backdrop: 'static' ,
       show: true
     });
-    var nanobar = new Nanobar({
+    const nanobar = new Nanobar({
       bg: '#42BEDB' , //(optional) background css property, '#000' by default
       target: document.getElementById('nanoBar') , //(optional) Where to put the progress bar, nanobar will be fixed to top of document if target is null
       // id for new nanobar
       id: 'nanoBar' // (optional) id for nanobar d
     });
 
-    var progressChunk = parseInt(byteLength / 100);
-    var currentProgress = 0;
-    for (var i = 0; i < byteLength; i++) {
-      var check = ((i % progressChunk) === 0);
+    const progressChunk = parseInt(byteLength / 100);
+    let currentProgress = 0;
+    for (let i = 0; i < byteLength; i++) {
+      const check = ((i % progressChunk) === 0);
       if (check) {
         currentProgress++;
         if (currentProgress <= 100) {
@@ -150,8 +151,8 @@ function showContentFilePreviewDialog(containFile) {
       }
       previewText += String.fromCharCode(unitArr[i]);
     }
-  }).always(function() {
-    window.setTimeout(function() {
+  }).always(() => {
+    window.setTimeout(() => {
       document.getElementById('nanoBar').remove();
     } , 1000);
   });
