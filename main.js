@@ -77,7 +77,7 @@ function loadZipFile(zipFile, filePath) {
     'width': '100%' ,
     'height': '100%'
   });
-  $zipContent.append('<p><h4> Contents of file ' + filePath + '</h4></p>');
+  $zipContent.append('<p><h5>This archive contains the following files:</h5></p>');
   const ulFiles = $zipContent.append('<ul/>');
 
   function showPreviewDialog(event) {
