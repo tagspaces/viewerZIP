@@ -1,3 +1,5 @@
+This repository is archived. Please use https://github.com/tagspaces/tagspaces-extensions instead.
+
 # ZIP Preview for TagSpaces
 
 A TagSpaces extension allowing you to preview the content of ZIP files.
